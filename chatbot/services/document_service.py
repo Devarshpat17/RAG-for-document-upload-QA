@@ -197,7 +197,8 @@ class DocumentService:
                 chunk_metadata = self._create_chunk_metadata(
                     chunk_id, 
                     len(chunks), 
-                    metadata
+                    metadata,
+                    chunk_text=chunk_text
                 )
                 chunks.append((chunk_text, chunk_metadata))
                 
@@ -218,7 +219,8 @@ class DocumentService:
             chunk_metadata = self._create_chunk_metadata(
                 chunk_id, 
                 len(chunks), 
-                metadata
+                metadata,
+                chunk_text=chunk_text
             )
             chunks.append((chunk_text, chunk_metadata))
         
@@ -240,7 +242,7 @@ class DocumentService:
         return [s.strip() for s in sentences if s.strip()]
     
     def _create_chunk_metadata(self, chunk_id: int, chunk_index: int, 
-                              base_metadata: dict = None) -> dict:
+                              base_metadata: dict = None, chunk_text: str = None) -> dict:
         """
         Create metadata dictionary for a text chunk.
         
@@ -248,6 +250,7 @@ class DocumentService:
             chunk_id: Unique identifier for this chunk
             chunk_index: Position of this chunk in the sequence
             base_metadata: Base metadata to extend
+            chunk_text: The actual chunk text to store
             
         Returns:
             Complete metadata dictionary
@@ -256,6 +259,7 @@ class DocumentService:
         metadata.update({
             'chunk_id': chunk_id,
             'chunk_index': chunk_index,
+            'chunk_text': chunk_text or '',  # Store the actual chunk text
         })
         return metadata
     

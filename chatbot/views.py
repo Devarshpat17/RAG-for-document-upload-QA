@@ -370,16 +370,17 @@ class ChatViewSet(viewsets.ViewSet):
             
             for metadata, score in top_results:
                 # Get the actual text from metadata
-                if 'original_record' in metadata:
+                if 'chunk_text' in metadata:
+                    # For documents, use the stored chunk text
+                    text = metadata.get('chunk_text', '')
+                elif 'original_record' in metadata:
                     # For JSON databases, use the record text
                     json_service = JSONService()
                     text = json_service._record_to_text(metadata['original_record'])
                 else:
-                    # For documents, we need to retrieve the chunk text
-                    # This is a simplified version - in production, store chunk text in metadata
-                    text = f"Context from {metadata.get('document_title', 'unknown source')}"
+                    text = ''
                 
-                context_chunks.append(text)
+                context_chunks.append(text) if text else None
                 
                 # Build source info
                 source_info = {

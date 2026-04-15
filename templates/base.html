@@ -1,0 +1,257 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AI Chatbot System{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div id="app">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h1 class="sidebar-title">ChatBot AI</h1>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li class="menu-item active" data-page="dashboard">
+                    <i class="menu-icon fas fa-chart-line"></i>
+                    Dashboard
+                </li>
+                <li class="menu-item" data-page="chat">
+                    <i class="menu-icon fas fa-comments"></i>
+                    Chat
+                </li>
+                <li class="menu-item" data-page="documents">
+                    <i class="menu-icon fas fa-file-pdf"></i>
+                    Documents
+                </li>
+                <li class="menu-item" data-page="json-db">
+                    <i class="menu-icon fas fa-database"></i>
+                    JSON Database
+                </li>
+                <li class="menu-item" data-page="history">
+                    <i class="menu-icon fas fa-history"></i>
+                    Chat History
+                </li>
+            </ul>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <!-- HEADER -->
+            <header class="header">
+                <h2 class="header-title">
+                    <span class="header-icon"></span>
+                    <span class="header-text">Dashboard</span>
+                </h2>
+                <div class="header-actions">
+                    <button class="btn btn-primary" id="clearChatBtn" style="display: none;">
+                        <i class="fas fa-trash"></i>
+                        Clear History
+                    </button>
+                </div>
+            </header>
+
+            <!-- CONTENT AREA -->
+            <div class="content">
+                <!-- DASHBOARD PAGE -->
+                <div class="page active" id="dashboard-page">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="total-docs">0</div>
+                            <div class="stat-label">Documents Uploaded</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="total-json">0</div>
+                            <div class="stat-label">JSON Databases</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="total-chats">0</div>
+                            <div class="stat-label">Chat Messages</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="system-status">OK</div>
+                            <div class="stat-label">System Status</div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-2">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-file-import"></i>
+                                    Quick Upload
+                                </h3>
+                            </div>
+                            <div class="upload-area" id="quick-upload">
+                                <div class="upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <p class="upload-text">Drag & Drop your documents here</p>
+                                <p class="upload-subtext">or click to browse (PDF, TXT)</p>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-info-circle"></i>
+                                    System Information
+                                </h3>
+                            </div>
+                            <div style="font-size: 14px; line-height: 2;">
+                                <p><strong>Backend:</strong> Django REST Framework</p>
+                                <p><strong>Vector DB:</strong> FAISS</p>
+                                <p><strong>Embeddings:</strong> Sentence Transformers</p>
+                                <p><strong>LLM Model:</strong> <span id="llm-model">Loading...</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-list"></i>
+                                Recent Documents
+                            </h3>
+                        </div>
+                        <div id="recent-docs" style="max-height: 300px; overflow-y: auto;"></div>
+                    </div>
+                </div>
+
+                <!-- CHAT PAGE -->
+                <div class="page" id="chat-page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-comments"></i>
+                                AI Chat Assistant
+                            </h3>
+                        </div>
+                        <div class="chat-container">
+                            <div class="chat-messages" id="chat-messages"></div>
+                            <div class="chat-input-area">
+                                <input type="text" id="chat-input" placeholder="Ask me anything..." />
+                                <button class="btn btn-primary btn-small" id="send-btn">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DOCUMENTS PAGE -->
+                <div class="page" id="documents-page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-file-pdf"></i>
+                                Upload Documents
+                            </h3>
+                        </div>
+                        <form id="upload-form" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label class="label">Document Title</label>
+                                <input type="text" class="input" id="doc-title" placeholder="Enter document title" required />
+                            </div>
+                            <div class="form-group">
+                                <label class="label">Select File (PDF or TXT)</label>
+                                <div class="input-file-wrapper">
+                                    <input type="file" id="doc-file" accept=".pdf,.txt" required />
+                                    <label class="file-input-label" for="doc-file">
+                                        <i class="fas fa-folder-open"></i>
+                                        <span>Click to select file or drag & drop</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload"></i>
+                                Upload Document
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-list"></i>
+                                Your Documents
+                            </h3>
+                        </div>
+                        <div id="documents-list"></div>
+                    </div>
+                </div>
+
+                <!-- JSON DATABASE PAGE -->
+                <div class="page" id="json-db-page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-database"></i>
+                                Upload JSON Database
+                            </h3>
+                        </div>
+                        <form id="json-form" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label class="label">Database Name</label>
+                                <input type="text" class="input" id="json-name" placeholder="Enter database name" required />
+                            </div>
+                            <div class="form-group">
+                                <label class="label">Description (Optional)</label>
+                                <input type="text" class="input" id="json-description" placeholder="Describe this JSON database" />
+                            </div>
+                            <div class="form-group">
+                                <label class="label">JSON Data</label>
+                                <textarea class="textarea" id="json-data" placeholder='Paste JSON data here, e.g., [{"name": "John", "age": 30}]' required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus"></i>
+                                Add Database
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-list"></i>
+                                JSON Databases
+                            </h3>
+                        </div>
+                        <div id="json-list"></div>
+                    </div>
+                </div>
+
+                <!-- CHAT HISTORY PAGE -->
+                <div class="page" id="history-page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-history"></i>
+                                Chat History
+                            </h3>
+                            <button class="btn btn-danger btn-small" id="clear-all-history">
+                                <i class="fas fa-trash"></i>
+                                Clear All
+                            </button>
+                        </div>
+                        <div id="history-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ALERTS CONTAINER -->
+    <div id="alerts-container" style="position: fixed; top: 20px; right: 20px; z-index: 999;"></div>
+
+    <script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>
