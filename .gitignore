@@ -75,11 +75,13 @@ huggingface/
 
 # HuggingFace cache
 ~/.cache/huggingface/
+.cache/huggingface/
 
 # Large model files
 *.tar.gz
 *.zip
 *.rar
+*.7z
 
 # Jupyter Notebook
 .ipynb_checkpoints
@@ -91,13 +93,61 @@ htmlcov/
 .pytest_cache/
 .tox/
 .hypothesis/
+test-results/
 
-# Documentation
+# Documentation (generated)
 docs/_build/
+site/
 
-# OS
+# Database backups
+*.bak
+*.backup
+db_backup/
+
+# Deployment logs
+logs/
+*.log.*
+deployment.log
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+temp/
+*~
+.DS_Store.cache
+
+# SSL certificates (development only)
+*.crt
+*.key
+*.pem
+!.gitkeep
+
+# System files
 Thumbs.db
 .DS_Store
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# Node/npm (if used for frontend tooling)
+node_modules/
+npm-debug.log
+package-lock.json
+
+# Compiled files
+*.class
+*.o
+*.a
+.make
+
+# Distribution
+dist/
+build/
+
+# Local configuration overrides
+local_settings.py
+.env.local.*
 .AppleDouble
 .LSOverride
 ._*
